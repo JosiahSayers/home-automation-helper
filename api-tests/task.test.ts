@@ -28,7 +28,7 @@ describe('/task', () => {
       expect(res.status).toBe(200);
     });
   
-    it.only('adds the task to the db', async () => {
+    it('adds the task to the db', async () => {
       const res = await fetch(url, { method: 'post', headers, body });
       const inDb = await db.task.findFirst({ where: { completedBy: tasksToCleanup[tasksToCleanup.length - 1] } });
       expect(res.status).toBe(200);
@@ -39,7 +39,7 @@ describe('/task', () => {
     });
   });
 
-  describe.only('GET /', () => {
+  describe('GET /', () => {
     it('allows searching by type', async () => {
       const res = await fetch(`${url}?type=${TaskType.putOutTrashCan}`, { headers });
       const body: { results: Task[] } = await res.json();
