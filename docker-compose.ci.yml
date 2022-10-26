@@ -1,0 +1,29 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=home-automation-helper
+      - POSTGRES_USER=developer
+      - POSTGRES_PASSWORD=password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    environment:
+      - NODE_ENV=testing
+      - CI=true
+      - PORT=3000
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/cgapi
+    ports:
+      - 3000:3000
+    depends_on:
+      db:
+        condition: service_healthy
