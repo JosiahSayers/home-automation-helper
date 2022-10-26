@@ -3,6 +3,9 @@ on:
   push:
     branches: [ main ]
 
+env:
+  DATABASE_URL: {{ secrets.DATABASE_URL }}
+
 jobs:
   Migrations:
     name: Run DB Migrations
@@ -21,7 +24,7 @@ jobs:
       run: npm ci
 
     - name: Push migrations
-      run: DATABASE_URL={{ secrets.DATABASE_URL }} npx prisma migrate deploy
+      run: npx prisma migrate deploy
 
   Deploy:
     runs-on: ubuntu-latest
