@@ -13,15 +13,22 @@ jobs:
     - name: Setup - Checkout code
       uses: actions/checkout@v1
 
-    - name: Create docker image
-      run: docker build -t ci .
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
     
+    - name: Instal dependencies
+      run: npm ci
+
     - name: Push migrations
-      run: docker run --rm -e DATABASE_URL=${{ secrets.DATABASE_URL }} ci npx prisma migrate deploy
+      run: npx prisma migrate deploy
 
   Deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup - Checkout code
+        uses: actions/checkout@v1
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
