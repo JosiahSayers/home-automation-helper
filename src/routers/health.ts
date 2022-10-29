@@ -5,7 +5,7 @@ const router = Router();
 
 const isDbConnected = async () => {
   try {
-    return !!(await db.task.findFirst);
+    return !!(await db.task.findFirst());
   } catch (e) {
     return false;
   }
