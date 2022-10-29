@@ -2,7 +2,7 @@ import { expect, it, describe } from 'vitest';
 import { environment } from '../src/utils/environment';
 
 describe('GET /', () => {
-  const url = `http://localhost:${environment.port()}/task`;
+  const url = `http://${environment.testHost()}:${environment.port()}/task`;
 
   it('returns a 401 response when the x-api-key header is missing', async () => {
     const res = await fetch(url);
