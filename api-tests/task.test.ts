@@ -4,7 +4,7 @@ import { db } from '../src/utils/db';
 import { environment } from '../src/utils/environment';
 
 describe('/task', () => {
-  const url = `http://localhost:${environment.port()}/task`;
+  const url = `http://${environment.testHost()}:${environment.port()}/task`;
   const tasksToCleanup: string[] = [];
   const headers = { 'x-api-key': 'valid', 'Content-Type': 'application/json' };
   let body: string;

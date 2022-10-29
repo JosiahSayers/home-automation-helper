@@ -22,6 +22,7 @@ services:
       - CI=true
       - PORT=3000
       - DATABASE_URL=postgres://developer@db:5432/home-automation-helper
+      - TEST_HOST=app
     ports:
       - 3000:3000
     depends_on:
