@@ -32,10 +32,6 @@ jobs:
       - name: Setup - Checkout code
         uses: actions/checkout@v1
 
-      - name: get-npm-version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@main
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -48,9 +44,25 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Docker meta
+        id: docker_meta
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            josiahsayers15/home-automation-helper
+          tags: |
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
         with:
+          context: .
+          platforms: linux/amd64,linux/arm/v7,linux/arm64/v8
           push: true
-          tags: josiahsayers15/home-automation-helper:latest,josiahsayers15/home-automation-helper:${{ steps.package-version.outputs.current-version}}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
