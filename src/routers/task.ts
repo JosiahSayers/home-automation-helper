@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { db } from '../utils/db';
+import { logger } from '../utils/logger';
 import { createTaskValidator } from '../validation/task/create';
 import { searchTaskValidator } from '../validation/task/search';
 
@@ -21,7 +22,7 @@ router.get('/', async (req, res) => {
     });
     return res.status(200).json({ results });
   } catch (e) {
-    console.error('Error searching tasks', e);
+    logger.error('Error searching tasks', e);
     return res.sendStatus(500);
   }
 });
@@ -37,7 +38,7 @@ router.post('/', async (req, res) => {
     });
     return res.sendStatus(200);
   } catch (e) {
-    console.error('Error creating task', e);
+    logger.error('Error creating task', e);
     return res.sendStatus(500);
   }
 });
