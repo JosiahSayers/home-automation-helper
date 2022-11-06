@@ -1,10 +1,11 @@
 import { getApp } from './app';
 import { environment } from './utils/environment';
+import { logger } from './utils/logger';
 
-process.on('uncaughtException', (e) => console.error(e));
+process.on('uncaughtException', (e) => logger.error('uncaughtException', e));
 
 getApp().then((app) => {
   app.listen(environment.port(), () => {
-    console.log(`App is listening on port ${environment.port()}`);
+    logger.info(`App is listening on port ${environment.port()}`);
   });
-}).catch(e => console.error(e));
+}).catch(e => logger.error('getApp promise error', e));
