@@ -1,0 +1,8 @@
+{
+  "include": ["src/**/*"],
+  "exclue": ["node_modules"],
+  "extends": "tsconfig/base.json",
+  "compilerOptions": {
+    "rootDir": "src"
+  }
+}
