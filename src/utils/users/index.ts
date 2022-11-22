@@ -18,7 +18,7 @@ export const createUser = async (data: CreateUserInput) => {
     } = user;
     return userForClient;
   } catch (e) {
-    logger.error('error creating user', { error: e });
+    logger.error(e, { msg: 'error creating user' });
     return null;
   }
 };

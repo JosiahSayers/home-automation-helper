@@ -8,7 +8,7 @@ const isDbConnected = async () => {
   try {
     return !!(await db.task.findFirst());
   } catch (e) {
-    logger.error('Error in healthcheck:isdbConnected', e);
+    logger.error(e, { msg: 'Error in healthcheck:isdbConnected' });
     return false;
   }
 };

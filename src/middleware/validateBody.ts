@@ -9,11 +9,11 @@ export const validateBody =
       try {
         await schema.parseAsync(req.body);
         next();
-      } catch (e: any) {
-        logger.error('failed to validate request body', {
+      } catch (e) {
+        logger.error(e, {
+          msg: 'failed to validate request body',
           path: req.path,
           method: req.method,
-          error: e,
         });
         const validationError = fromZodError(e);
         return res.status(403).json({
