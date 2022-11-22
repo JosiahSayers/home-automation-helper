@@ -17,14 +17,18 @@ const transports: winston.transport[] = [
 
 if (!environment.isProduction()) {
   transports.push(new winston.transports.Console({
-    format: winston.format.simple(),
+    format: winston.format.combine(
+      winston.format.simple(),
+      winston.format.colorize()
+    )
   }));
 }
 
 export const logger = winston.createLogger({
   format: winston.format.combine(
-    winston.format.json(),
+    winston.format.errors({ stack: true }),
     winston.format.timestamp(),
+    winston.format.json(),
   ),
   transports,
 });

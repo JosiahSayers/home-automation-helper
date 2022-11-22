@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { validateApiKey } from './middleware/validateApiKey';
 import { healthRouter } from './routers/health';
-import { taskRouter } from './routers/task';
+import { usersRouter } from './routers/users';
 import { environment } from './utils/environment';
 
 export const getApp = async () => {  
@@ -13,8 +13,8 @@ export const getApp = async () => {
   app.use(cors());
 
   app.use('/health', healthRouter);
+  app.use('/users', usersRouter);
   app.use(validateApiKey);
-  app.use('/task', taskRouter);
 
   return app;
 };
