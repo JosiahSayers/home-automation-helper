@@ -1,0 +1,17 @@
+{
+  "name": "validations",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "devDependencies": {
+    "tsconfig": "*",
+    "typescript": "^4.9.3"
+  },
+  "dependencies": {
+    "zod": "^3.19.1"
+  },
+  "scripts": {
+    "build": "tsc"
+  }
+}

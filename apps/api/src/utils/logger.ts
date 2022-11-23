@@ -1,8 +1,10 @@
 import winston from 'winston';
 import path from 'path';
-import { environment } from './environment';
 
-const logDirectory = environment.isProduction()
+// can't use environment because environment requires the logger
+const isProduction = process.env.NODE_ENV === 'production';
+
+const logDirectory = isProduction
   ? path.join('/appdata', 'logs')
   : path.join(process.cwd(), 'logs');
 
@@ -15,7 +17,7 @@ const transports: winston.transport[] = [
   new winston.transports.File({ dirname: logDirectory, filename: 'combined.log' }),
 ];
 
-if (!environment.isProduction()) {
+if (!isProduction) {
   transports.push(new winston.transports.Console({
     format: winston.format.combine(
       winston.format.simple(),

@@ -1,4 +1,4 @@
-import { CreateUserInput } from '../../validation/users/create';
+import { CreateUserInput } from 'validations';
 import { db } from '../db';
 import { logger } from '../logger';
 import { encrypt } from './password';

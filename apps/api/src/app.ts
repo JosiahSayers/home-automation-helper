@@ -3,6 +3,7 @@ import cors from 'cors';
 import { validateApiKey } from './middleware/validateApiKey';
 import { healthRouter } from './routers/health';
 import { usersRouter } from './routers/users';
+import { getUser } from './middleware/auth/jwt';
 import { environment } from './utils/environment';
 
 export const getApp = async () => {  
@@ -13,6 +14,7 @@ export const getApp = async () => {
   app.use(cors());
 
   app.use('/health', healthRouter);
+  app.use(getUser);
   app.use('/users', usersRouter);
   app.use(validateApiKey);
 
