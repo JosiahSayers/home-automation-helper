@@ -2,8 +2,10 @@ import { Router } from 'express';
 import { validateBody, ValidatedBody } from '../middleware/validateBody';
 import { createUser } from '../utils/users';
 import { CreateUserInput, createUserValidator } from 'validations';
-import { environment } from '../utils/environment';
-import { signInAs } from '../utils/test-helpers/user-auth-helpers';
+import { getUser } from '../middleware/auth/jwt';
+import { db } from '../utils/db';
+import { doPasswordsMatch } from '../utils/users/password';
+import { createSessionToken } from '../utils/authentication/session';
 
 const router = Router();
 
@@ -12,13 +14,19 @@ router.post('/', validateBody(createUserValidator), async (req: ValidatedBody<Cr
   return user ? res.json(user) : res.sendStatus(500);
 });
 
-router.get('/', (req, res) => res.json(req.jwt));
+router.get('/current', getUser, async (req, res) => res.json(await db.user.findUnique({ where: { id: req.uid } })));
 
-router.post('/test-sign-in', async (req, res) => {
-  if (environment.isProduction()) {
-    return res.sendStatus(404);
+router.post('/authenticate', async (req, res) => {
+  const user = await db.user.findUnique({ where: { email: req.body.email } });
+  if (!user) {
+    return res.status(401).json({ msg: 'User not found or password not correct' });
   }
-  return res.json(await signInAs(req.body.email, req.body.password));
+  const passwordsMatch = await doPasswordsMatch(req.body.password, user.password);
+  if (!passwordsMatch) {
+    return res.status(401).json({ msg: 'User not found or password not correct' });
+  }
+  const token = await createSessionToken(user.id);
+  return res.json({ idToken: token });
 });
 
 export { router as usersRouter };
