@@ -11,6 +11,10 @@
     "dev": {
       "dependsOn": ["^build"],
       "cache": false
+    },
+    "test:unit": {
+      "outputs": [],
+      "cache": false
     }
   }
 }

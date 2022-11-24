@@ -53,7 +53,7 @@ export const createGroup = async (input: CreateGroupInput, userId: string) =>
 
 export const updateGroup = async (
   groupId: string,
-  input: Partial<CreateGroupInput>,
+  input: Partial<CreateGroupInput>
 ) => {
   return db.group.update({
     where: {
