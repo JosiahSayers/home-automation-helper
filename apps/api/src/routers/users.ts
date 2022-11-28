@@ -9,21 +9,34 @@ import { createSessionToken } from '../utils/authentication/session';
 
 const router = Router();
 
-router.post('/', validateBody(createUserValidator), async (req: ValidatedBody<CreateUserInput>, res) => {
-  const user = await createUser(req.body);
-  return user ? res.json(user) : res.sendStatus(500);
-});
+router.post(
+  '/',
+  validateBody(createUserValidator),
+  async (req: ValidatedBody<CreateUserInput>, res) => {
+    const user = await createUser(req.body);
+    return user ? res.json(user) : res.sendStatus(500);
+  }
+);
 
-router.get('/current', getUser, async (req, res) => res.json(await db.user.findUnique({ where: { id: req.uid } })));
+router.get('/current', getUser, async (req, res) =>
+  res.json(await db.user.findUnique({ where: { id: req.uid } }))
+);
 
 router.post('/authenticate', async (req, res) => {
   const user = await db.user.findUnique({ where: { email: req.body.email } });
   if (!user) {
-    return res.status(401).json({ msg: 'User not found or password not correct' });
+    return res
+      .status(401)
+      .json({ msg: 'User not found or password not correct' });
   }
-  const passwordsMatch = await doPasswordsMatch(req.body.password, user.password);
+  const passwordsMatch = await doPasswordsMatch(
+    req.body.password,
+    user.password
+  );
   if (!passwordsMatch) {
-    return res.status(401).json({ msg: 'User not found or password not correct' });
+    return res
+      .status(401)
+      .json({ msg: 'User not found or password not correct' });
   }
   const token = await createSessionToken(user.id);
   return res.json({ idToken: token });

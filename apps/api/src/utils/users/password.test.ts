@@ -6,7 +6,7 @@ vi.mock('bcryptjs', () => ({
   default: {
     hash: vi.fn().mockResolvedValue('HASHED PASSWORD'),
     compare: vi.fn().mockResolvedValue(true),
-  }
+  },
 }));
 
 afterEach(() => {

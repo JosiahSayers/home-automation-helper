@@ -6,12 +6,14 @@ export const environment = {
     if (process.env.NODE_ENV !== 'production') {
       dotenv.config();
     }
-    const requiredVariables = [
-      'FIREBASE_ADMIN_CREDENTIALS'
-    ];
-    const missingVariables = requiredVariables.filter(envVar => !process.env[envVar]);
+    const requiredVariables: string[] = [];
+    const missingVariables = requiredVariables.filter(
+      (envVar) => !process.env[envVar]
+    );
     if (missingVariables.length) {
-      logger.error(`missing environment variables: ${missingVariables.join(', ')}`);
+      logger.error(
+        `missing environment variables: ${missingVariables.join(', ')}`
+      );
       process.exit(1);
     }
   },
@@ -19,6 +21,4 @@ export const environment = {
   testHost: () => process.env.TEST_HOST || 'http://localhost',
   validApiKeys: () => (process.env.API_KEYS || '').split(','),
   isProduction: () => process.env.NODE_ENV === 'production',
-  firebaseAdminCredentials: () => JSON.parse(process.env.FIREBASE_ADMIN_CREDENTIALS!),
-  firebaseTestingKey: () => process.env.FIREBASE_TESTING_API_KEY!,
 };

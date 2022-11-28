@@ -2,14 +2,27 @@
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
     "build": {
-      "dependsOn": ["^build", "$NODE_ENV", "$PORT", "$TEST_HOST", "$API_KEYS", "$FIREBASE_ADMIN_CREDENTIALS", "$FIREBASE_TESTING_API_KEY"],
-      "outputs": ["dist/**", ".next/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ],
+      "env": [
+        "NODE_ENV",
+        "PORT",
+        "TEST_HOST",
+        "API_KEYS"
+      ]
     },
     "lint": {
       "outputs": []
     },
     "dev": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": false
     },
     "test:unit": {

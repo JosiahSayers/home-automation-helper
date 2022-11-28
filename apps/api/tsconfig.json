@@ -3,6 +3,8 @@
   "exclue": ["node_modules"],
   "extends": "tsconfig/base.json",
   "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
     "rootDir": "src"
   }
 }
