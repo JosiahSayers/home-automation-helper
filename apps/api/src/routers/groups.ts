@@ -1,11 +1,7 @@
 import { Router } from 'express';
-import {
-  CreateGroupInput,
-  createGroupValidator,
-  InviteUserToGroupInput,
-  inviteUserToGroupValidator,
-} from 'validations';
+import { CreateGroupInput, createGroupValidator } from 'validations';
 import { userCanManageGroup } from '../middleware/auth/groups/userCanManageGroup';
+import { userCanViewGroup } from '../middleware/auth/groups/userCanViewGroup';
 import { validateBody, ValidatedBody } from '../middleware/validateBody';
 import { inviteUserToGroup } from '../utils/groups/membership';
 import {
@@ -22,7 +18,7 @@ router.get('/', async (req, res) => {
   return res.json(groups);
 });
 
-router.get('/:groupId', async (req, res) => {
+router.get('/:groupId', userCanViewGroup, async (req, res) => {
   const group = await getGroupWithMembers(req.params.groupId, req.uid);
   return group ? res.json(group) : res.sendStatus(404);
 });
@@ -46,20 +42,11 @@ router.post(
   }
 );
 
-router.post(
-  '/:groupId/invite',
-  userCanManageGroup,
-  validateBody(inviteUserToGroupValidator),
-  async (req: ValidatedBody<InviteUserToGroupInput>, res) => {
-    const successful = await inviteUserToGroup(
-      req.params.groupId,
-      req.uid,
-      req.body.email
-    );
-    return successful
-      ? res.sendStatus(200)
-      : res.status(500).json({ msg: 'Unable to invite user to group' });
-  }
-);
+router.post('/:groupId/invite', userCanManageGroup, async (req, res) => {
+  const invite = await inviteUserToGroup(req.params.groupId, req.uid);
+  return invite
+    ? res.json({ inviteId: invite.id })
+    : res.status(500).json({ msg: 'Unable to invite user to group' });
+});
 
 export { router as groupsRouter };

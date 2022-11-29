@@ -1,26 +1,25 @@
 import { NextFunction, Request, Response } from 'express';
 import { db } from '../../../utils/db';
 
-export const userCanManageGroup = async (
+export const userCanViewGroup = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const groupWithUserAsOwner = await db.group.findFirst({
+  const groupWithUserAsMember = await db.group.findFirst({
     where: {
       id: req.params.groupId,
       members: {
         some: {
           userId: req.uid,
-          membershipType: 'owner',
         },
       },
     },
   });
-  if (!groupWithUserAsOwner) {
+  if (!groupWithUserAsMember) {
     return res
       .status(401)
-      .json({ msg: 'User does not have access to manage this group' });
+      .json({ msg: 'User does not have access to this group' });
   }
   return next();
 };

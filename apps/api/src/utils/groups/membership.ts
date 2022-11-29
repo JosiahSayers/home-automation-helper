@@ -1,62 +1,24 @@
-import { User } from '@prisma/client';
+import { GroupInvite } from '@prisma/client';
 import { db } from '../db';
-import { getGroupWithMembers } from './queries';
+import { logger } from '../logger';
 
 export const inviteUserToGroup = async (
   groupId: string,
-  inviterId: string,
-  inviteeEmail: string
-): Promise<boolean> => {
+  inviterId: string
+): Promise<GroupInvite | null> => {
   const inviter = await db.user.findUnique({ where: { id: inviterId } });
-  if (!inviter) {
-    return false;
+  const group = await db.group.findUnique({ where: { id: groupId } });
+  if (!inviter || !group) {
+    logger.debug('Creating group invite failed, user or group not found', {
+      inviter,
+      group,
+    });
+    return null;
   }
-
-  const invitee = await db.user.findUnique({ where: { email: inviteeEmail } });
-  if (!invitee) {
-    return inviteUserWithoutAccount(groupId, inviter, inviteeEmail);
-  }
-
-  const group = await getGroupWithMembers(groupId, inviterId);
-  const userIsAlreadyInGroup = group?.members.some(
-    (member) => member.userId === invitee.id
-  );
-  if (userIsAlreadyInGroup) {
-    return true;
-  }
-
-  return inviteUserWithAccount(groupId, inviter, invitee);
-};
-
-const inviteUserWithoutAccount = async (
-  groupId: string,
-  inviter: User,
-  inviteeEmail: string
-) => {
-  await db.groupInvite.create({
+  return db.groupInvite.create({
     data: {
-      groupId,
       invitedById: inviter.id,
-      email: inviteeEmail,
+      groupId,
     },
   });
-  // send email inviting user to create an account
-  return true;
-};
-
-const inviteUserWithAccount = async (
-  groupId: string,
-  inviter: User,
-  invitee: User
-) => {
-  await db.groupInvite.create({
-    data: {
-      groupId,
-      invitedById: inviter.id,
-      userId: invitee.id,
-    },
-  });
-  // send push notification about group invite if available
-  // send email about group invite if push not available
-  return true;
 };

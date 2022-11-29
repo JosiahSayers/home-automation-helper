@@ -16,16 +16,15 @@ model SigningKey {
 }
 
 model User {
-  id                  String         @id() @default(uuid())
-  name                String
-  email               String         @unique()
-  password            String
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt()
-  GroupMembers        GroupMembers[]
-  TaskType            TaskType[]
-  GroupInvite         GroupInvite[]
-  PendingGroupInvites GroupInvite[]  @relation("invitedBy")
+  id           String         @id() @default(uuid())
+  name         String
+  email        String         @unique()
+  password     String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt()
+  GroupMembers GroupMembers[]
+  TaskType     TaskType[]
+  groupInvites GroupInvite[]
 }
 
 model Group {
@@ -35,9 +34,9 @@ model Group {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt()
 
-  members     GroupMembers[]
-  TaskType    TaskType[]
-  GroupInvite GroupInvite[]
+  members  GroupMembers[]
+  TaskType TaskType[]
+  invites  GroupInvite[]
 }
 
 model GroupMembers {
@@ -58,18 +57,20 @@ enum GroupMembershipType {
 }
 
 model GroupInvite {
-  id          String   @id @default(uuid())
-  group       Group    @relation(fields: [groupId], references: [id])
+  id          String            @id @default(uuid())
+  group       Group             @relation(fields: [groupId], references: [id])
   groupId     String
-  invitedBy   User     @relation("invitedBy", fields: [invitedById], references: [id])
+  invitedBy   User              @relation(fields: [invitedById], references: [id])
   invitedById String
-  user        User?    @relation(fields: [userId], references: [id])
-  userId      String?
-  email       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt()
+  status      GroupInviteStatus @default(pending)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt()
+}
 
-  @@unique([userId, email, groupId])
+enum GroupInviteStatus {
+  pending
+  accepted
+  rejected
 }
 
 model TaskType {

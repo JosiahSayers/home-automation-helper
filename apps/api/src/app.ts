@@ -6,8 +6,9 @@ import { getUser } from './middleware/auth/jwt';
 import { environment } from './utils/environment';
 import { groupsRouter } from './routers/groups';
 import { cacheExistingSigningKeys } from './utils/authentication/session';
+import { groupInviteRouter } from './routers/groupInvites';
 
-export const getApp = async () => {  
+export const getApp = async () => {
   const app = express();
   environment.loadEnv();
   await cacheExistingSigningKeys();
@@ -19,6 +20,7 @@ export const getApp = async () => {
   app.use('/users', usersRouter);
   app.use(getUser);
   app.use('/groups', groupsRouter);
+  app.use('/groups/invites', groupInviteRouter);
 
   return app;
 };

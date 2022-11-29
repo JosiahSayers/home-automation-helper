@@ -27,39 +27,23 @@ describe('inviteUserToGroup', () => {
     ))!;
   });
 
-  test('when email is not used by any existing users', async () => {
-    const badEmail = `${new Date().getTime()}@unittest.com`;
-    await inviteUserToGroup(testGroup.id, testUser.id, badEmail);
-    const invite = await db.groupInvite.findFirst({
-      where: {
-        email: badEmail,
-      },
-    });
-    expect(invite).not.toBeNull();
-    expect(invite?.email).toBe(badEmail);
-    expect(invite?.groupId).toBe(testGroup.id);
-    expect(invite?.invitedById).toBe(testUser.id);
-    expect(invite?.userId).toBeNull();
+  test('does not create an invite when the invitedId is not valid', async () => {
+    const response = await inviteUserToGroup(testGroup.id, 'invalid user id');
+    expect(response).toBeNull();
   });
 
-  test('whem email is in use by an existing user', async () => {
-    const email = `${new Date().getTime()}@unittest.com`;
-    const { user } = (await createUser({
-      email,
-      name: 'new user for test',
-      password: 'password',
-    }))!;
-    await inviteUserToGroup(testGroup.id, testUser.id, email);
-    const invite = await db.groupInvite.findFirst({
-      where: {
-        userId: user.id,
-        groupId: testGroup.id,
-      },
+  test('does not create an invite when the groupId is not valid', async () => {
+    const response = await inviteUserToGroup('invalid group id', testUser.id);
+    expect(response).toBeNull();
+  });
+
+  test('creates and returns an invite', async () => {
+    const response = await inviteUserToGroup(testGroup.id, testUser.id);
+    const inviteFromDb = await db.groupInvite.findUnique({
+      where: { id: response?.id },
     });
-    expect(invite).toBeTruthy();
-    expect(invite?.email).toBeFalsy();
-    expect(invite?.groupId).toBe(testGroup.id);
-    expect(invite?.invitedById).toBe(testUser.id);
-    expect(invite?.userId).toBe(user.id);
+    expect(response).not.toBeNull();
+    expect(inviteFromDb).not.toBeNull();
+    expect(response).toEqual(inviteFromDb);
   });
 });
