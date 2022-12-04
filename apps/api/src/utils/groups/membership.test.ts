@@ -17,7 +17,7 @@ describe('inviteUserToGroup', () => {
       name: 'Unit Test User',
       email: `${time}@test.com`,
       password: 'password',
-    }))!.user;
+    }))!;
     testGroup = (await createGroup(
       {
         description: 'group created for unit test',

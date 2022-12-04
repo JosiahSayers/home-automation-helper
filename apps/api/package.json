@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "test:unit": "vitest src",
-    "test:api": "vitest api-tests",
+    "test:unit": "NODE_ENV=testing vitest src",
+    "test:api": "NODE_ENV=testing vitest api-tests",
     "lint": "eslint",
     "typecheck": "tsc",
     "build": "etsc",

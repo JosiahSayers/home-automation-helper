@@ -1,2 +1,2 @@
-export * from './user/create';
+export * from './user';
 export * from './groups';

@@ -3,6 +3,7 @@ import path from 'path';
 
 // can't use environment because environment requires the logger
 const isProduction = process.env.NODE_ENV === 'production';
+const isTesting = process.env.NODE_ENV === 'testing';
 
 const logDirectory = isProduction
   ? path.join('/appdata', 'logs')
@@ -24,7 +25,7 @@ const transports: winston.transport[] = [
   }),
 ];
 
-if (!isProduction) {
+if (!isProduction && !isTesting) {
   transports.push(
     new winston.transports.Console({
       format: winston.format.combine(
