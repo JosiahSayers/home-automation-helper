@@ -42,4 +42,5 @@ export const logger = winston.createLogger({
     winston.format.json()
   ),
   transports,
+  level: 'debug',
 });

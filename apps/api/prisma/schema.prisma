@@ -16,15 +16,16 @@ model SigningKey {
 }
 
 model User {
-  id           String         @id() @default(uuid())
-  name         String
-  email        String         @unique()
-  password     String
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt()
-  GroupMembers GroupMembers[]
-  TaskType     TaskType[]
-  groupInvites GroupInvite[]
+  id              String         @id() @default(uuid())
+  name            String
+  email           String         @unique()
+  password        String
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt()
+  groupMembers    GroupMembers[]
+  taskType        TaskType[]
+  acceptedInvites GroupInvite[]  @relation("accepted-group-invites")
+  groupInvites    GroupInvite[]
 }
 
 model Group {
@@ -35,7 +36,7 @@ model Group {
   updatedAt   DateTime @updatedAt()
 
   members  GroupMembers[]
-  TaskType TaskType[]
+  taskType TaskType[]
   invites  GroupInvite[]
 }
 
@@ -57,14 +58,16 @@ enum GroupMembershipType {
 }
 
 model GroupInvite {
-  id          String            @id @default(uuid())
-  group       Group             @relation(fields: [groupId], references: [id])
-  groupId     String
-  invitedBy   User              @relation(fields: [invitedById], references: [id])
-  invitedById String
-  status      GroupInviteStatus @default(pending)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt()
+  id           String            @id @default(uuid())
+  group        Group             @relation(fields: [groupId], references: [id])
+  groupId      String
+  invitedBy    User              @relation(fields: [invitedById], references: [id])
+  invitedById  String
+  status       GroupInviteStatus @default(pending)
+  acceptedBy   User?             @relation("accepted-group-invites", fields: [acceptedById], references: [id])
+  acceptedById String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt()
 }
 
 enum GroupInviteStatus {

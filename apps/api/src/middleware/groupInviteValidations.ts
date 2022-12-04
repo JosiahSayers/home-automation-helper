@@ -13,7 +13,7 @@ export const validInviteAction = (
     return res.status(403).json({
       msg: `Invalid invite action sent: ${
         req.params.action
-      }. Valid action: ${validActions.join(', ')}`,
+      }. Valid actions: ${validActions.join(', ')}`,
     });
   }
   return next();

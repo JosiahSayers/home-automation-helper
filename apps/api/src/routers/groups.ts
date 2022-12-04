@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { CreateGroupInput, createGroupValidator } from 'validations';
 import { userCanManageGroup } from '../middleware/auth/groups/userCanManageGroup';
 import { userCanViewGroup } from '../middleware/auth/groups/userCanViewGroup';
+import { requireUser } from '../middleware/auth/jwt';
 import { validateBody, ValidatedBody } from '../middleware/validateBody';
 import { inviteUserToGroup } from '../utils/groups/membership';
 import {
@@ -13,7 +14,7 @@ import {
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+router.get('/', requireUser, async (req, res) => {
   const groups = await getGroupsForUser(req.uid);
   return res.json(groups);
 });
