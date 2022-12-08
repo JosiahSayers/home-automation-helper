@@ -22,11 +22,11 @@ export const userRouter = router({
       if (!user) {
         throw authError;
       }
+
       const passwordsMatch = await doPasswordsMatch(
         input.password,
         user.password
       );
-
       if (!passwordsMatch) {
         throw authError;
       }

@@ -3,7 +3,7 @@ import { Context } from './context';
 
 const t = initTRPC.context<Context>().create();
 
-const isAuthed = t.middleware(({ next, ctx }) => {
+const isAuthenticated = t.middleware(({ next, ctx }) => {
   if (!ctx.uid) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
@@ -11,7 +11,6 @@ const isAuthed = t.middleware(({ next, ctx }) => {
   }
   return next({
     ctx: {
-      // Infers the `session` as non-nullable
       uid: ctx.uid,
     },
   });
@@ -20,4 +19,4 @@ const isAuthed = t.middleware(({ next, ctx }) => {
 export const middleware = t.middleware;
 export const router = t.router;
 export const publicProcedure = t.procedure;
-export const protectedProcedure = t.procedure.use(isAuthed);
+export const protectedProcedure = t.procedure.use(isAuthenticated);

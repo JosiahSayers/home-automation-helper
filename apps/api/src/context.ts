@@ -11,10 +11,6 @@ export async function createContext({
   }
 
   const uid = verifyToken(token);
-  if (!uid) {
-    return {};
-  }
-
   return { uid };
 }
 

@@ -4,15 +4,18 @@ import * as trpcExpress from '@trpc/server/adapters/express';
 import { healthRouter } from './routers/health';
 import { getUser } from './middleware/auth/jwt';
 import { environment } from './utils/environment';
-import { groupsRouter } from './routers/groups';
 import { cacheExistingSigningKeys } from './utils/authentication/session';
 import { groupInviteRouter } from './routers/groupInvites';
 import { router } from './trpc';
-import { userRouter } from './procedures/user';
+import { userRouter } from './trpc-routers/user';
 import { createContext } from './context';
+import { groupRouter } from './trpc-routers/group';
+import { inviteRouter } from './trpc-routers/invite';
 
 export const trpcRouter = router({
   user: userRouter,
+  group: groupRouter,
+  invite: inviteRouter,
 });
 
 export type AppRouter = typeof trpcRouter;
@@ -35,7 +38,6 @@ export const getApp = async () => {
 
   app.use('/health', healthRouter);
   app.use(getUser);
-  app.use('/groups', groupsRouter);
   app.use('/groups/invites', groupInviteRouter);
 
   return app;

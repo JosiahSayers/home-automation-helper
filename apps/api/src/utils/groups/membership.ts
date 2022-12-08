@@ -8,7 +8,12 @@ export const inviteUserToGroup = async (
   inviterId: string
 ): Promise<GroupInvite | null> => {
   const inviter = await db.user.findUnique({ where: { id: inviterId } });
-  const group = await db.group.findUnique({ where: { id: groupId } });
+  const group = await db.group.findFirst({
+    where: {
+      id: groupId,
+      members: { some: { userId: inviterId, membershipType: 'owner' } },
+    },
+  });
   if (!inviter || !group) {
     logger.debug('Creating group invite failed, user or group not found', {
       inviter,
