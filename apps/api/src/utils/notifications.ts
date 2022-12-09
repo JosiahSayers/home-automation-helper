@@ -8,28 +8,40 @@ import { logger } from './logger';
  */
 
 export const sendNotification = async (
-  notification: NotificationNames,
-  params: NotificationParams[typeof notification]
+  sendToUserId: string,
+  params: NotificationParams
 ) => {
   const notificationData = {
-    notificationName: notification,
-    title: notifications[notification].title(params),
+    notificationName: params.notification,
+    title: notifications[params.notification].title(params as any),
   };
-  logger.debug('Sending notification', notificationData);
+  logger.debug(
+    `Sending notification to user: ${sendToUserId}`,
+    notificationData
+  );
 };
 
 const notifications = {
   inviteAccepted: {
-    title: ({ acceptedBy, group }: NotificationParams['inviteAccepted']) =>
+    title: ({ acceptedBy, group }: InviteAcceptedParams) =>
       `${acceptedBy.name} has joined ${group.name}`,
+  },
+  inviteRejected: {
+    title: ({ rejectedBy, group }: InviteRejectedParams) =>
+      `${rejectedBy.name} has declined your invite to join ${group.name}`,
   },
 };
 
-type NotificationNames = keyof typeof notifications;
-
-interface NotificationParams {
-  inviteAccepted: {
-    acceptedBy: User;
-    group: Group;
-  };
+interface InviteAcceptedParams {
+  notification: 'inviteAccepted';
+  acceptedBy: User;
+  group: Group;
 }
+
+interface InviteRejectedParams {
+  notification: 'inviteRejected';
+  rejectedBy: User;
+  group: Group;
+}
+
+type NotificationParams = InviteAcceptedParams | InviteRejectedParams;

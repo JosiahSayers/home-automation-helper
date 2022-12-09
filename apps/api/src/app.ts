@@ -2,10 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import * as trpcExpress from '@trpc/server/adapters/express';
 import { healthRouter } from './routers/health';
-import { getUser } from './middleware/auth/jwt';
 import { environment } from './utils/environment';
 import { cacheExistingSigningKeys } from './utils/authentication/session';
-import { groupInviteRouter } from './routers/groupInvites';
 import { router } from './trpc';
 import { userRouter } from './trpc-routers/user';
 import { createContext } from './context';
@@ -37,8 +35,6 @@ export const getApp = async () => {
   app.use(cors());
 
   app.use('/health', healthRouter);
-  app.use(getUser);
-  app.use('/groups/invites', groupInviteRouter);
 
   return app;
 };

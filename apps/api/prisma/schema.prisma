@@ -58,16 +58,16 @@ enum GroupMembershipType {
 }
 
 model GroupInvite {
-  id           String            @id @default(uuid())
-  group        Group             @relation(fields: [groupId], references: [id])
-  groupId      String
-  invitedBy    User              @relation(fields: [invitedById], references: [id])
-  invitedById  String
-  status       GroupInviteStatus @default(pending)
-  acceptedBy   User?             @relation("accepted-group-invites", fields: [acceptedById], references: [id])
-  acceptedById String?
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt()
+  id               String            @id @default(uuid())
+  group            Group             @relation(fields: [groupId], references: [id])
+  groupId          String
+  invitedBy        User              @relation(fields: [invitedById], references: [id])
+  invitedById      String
+  status           GroupInviteStatus @default(pending)
+  respondingUser   User?             @relation("accepted-group-invites", fields: [respondingUserId], references: [id])
+  respondingUserId String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt()
 }
 
 enum GroupInviteStatus {

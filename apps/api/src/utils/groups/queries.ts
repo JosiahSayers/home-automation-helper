@@ -1,12 +1,34 @@
+import { GroupMembershipType } from '@prisma/client';
 import { CreateGroupInput } from 'validations';
 import { db } from '../db';
 
-export const getGroupsForUser = async (userId: string) =>
+export const getGroupsForUser = async (
+  userId: string,
+  membershipType?: GroupMembershipType
+) =>
   db.group.findMany({
     where: {
       members: {
         some: {
           userId,
+          membershipType,
+        },
+      },
+    },
+  });
+
+export const getGroupForUser = async (
+  groupId: string,
+  userId: string,
+  membershipType?: GroupMembershipType
+) =>
+  db.group.findFirst({
+    where: {
+      id: groupId,
+      members: {
+        some: {
+          userId,
+          membershipType,
         },
       },
     },
@@ -52,12 +74,11 @@ export const createGroup = async (input: CreateGroupInput, userId: string) =>
   });
 
 export const updateGroup = async (
-  groupId: string,
-  input: Partial<CreateGroupInput>
+  input: Partial<CreateGroupInput> & { groupId: string }
 ) => {
   return db.group.update({
     where: {
-      id: groupId,
+      id: input.groupId,
     },
     data: {
       name: input.name,
@@ -65,3 +86,15 @@ export const updateGroup = async (
     },
   });
 };
+
+export const getGroupWithAllMemberAndUser = async (id: string) =>
+  db.group.findUnique({
+    where: { id },
+    include: {
+      members: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
