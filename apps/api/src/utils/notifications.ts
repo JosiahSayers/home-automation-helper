@@ -3,11 +3,11 @@ import { logger } from './logger';
 
 /** TODO
  * Actually send a notification
- * Make promise always resolve when created and retry failed notifications
+ * Retry failed notifications
  * Log record of notifications to database
  */
 
-export const sendNotification = async (
+export const sendNotification = (
   sendToUserId: string,
   params: NotificationParams
 ) => {

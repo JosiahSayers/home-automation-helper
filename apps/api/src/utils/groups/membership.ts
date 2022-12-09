@@ -51,6 +51,13 @@ export const respondToGroupInvite = async (
       statusCode: 'PRECONDITION_FAILED',
     };
   }
+  if (invite.status !== 'pending') {
+    return {
+      success: false,
+      errorMessage: 'This invite has already received a response',
+      statusCode: 'PRECONDITION_FAILED',
+    };
+  }
 
   const group = await getGroupWithAllMemberAndUser(invite.groupId);
   const respondingUser = await db.user.findUnique({
