@@ -8,3 +8,17 @@ export const truncateDb = async () => {
   await db.group.deleteMany();
   await db.user.deleteMany();
 };
+
+export const deleteGroups = async (ids: string[]) => {
+  await db.groupMembers.deleteMany({
+    where: { groupId: { in: ids } },
+  });
+  await db.group.deleteMany({ where: { id: { in: ids } } });
+};
+
+export const deleteUsers = async (ids: string[]) => {
+  await db.groupMembers.deleteMany({
+    where: { userId: { in: ids } },
+  });
+  await db.user.deleteMany({ where: { id: { in: ids } } });
+};

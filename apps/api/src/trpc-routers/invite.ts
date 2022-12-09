@@ -1,3 +1,4 @@
+import { GroupInviteStatus } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { protectedProcedure, publicProcedure, router } from '../trpc';
@@ -30,7 +31,13 @@ export const inviteRouter = router({
 
   respond: protectedProcedure
     .input(
-      z.object({ id: z.string(), action: z.enum(['accepted', 'rejected']) })
+      z.object({
+        id: z.string(),
+        action: z.enum([
+          GroupInviteStatus.accepted,
+          GroupInviteStatus.rejected,
+        ]),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const inviteAcceptStatus = await respondToGroupInvite(
