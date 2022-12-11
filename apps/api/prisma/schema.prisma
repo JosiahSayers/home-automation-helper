@@ -122,3 +122,9 @@ model TaskCompletionRecord {
   task              Task   @relation(fields: [taskTypeId], references: [id])
   taskTypeId        String
 }
+
+model NotificationRunnerRecord {
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+}

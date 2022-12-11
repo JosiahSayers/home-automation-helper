@@ -10,7 +10,7 @@ export const notificationSettingsValidator = z.discriminatedUnion('schedule', [
   z.object({ schedule: z.literal('daily'), ...baseFields }),
   z.object({
     schedule: z.literal('weekly'),
-    dayOfWeek: z.number().min(1).max(7),
+    dayOfWeek: z.number().min(0).max(7),
     ...baseFields,
   }),
   z.object({

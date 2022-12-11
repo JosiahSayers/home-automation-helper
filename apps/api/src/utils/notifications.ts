@@ -1,4 +1,4 @@
-import { Group, User } from '@prisma/client';
+import { Group, Task, User } from '@prisma/client';
 import { logger } from './logger';
 
 /** TODO
@@ -30,6 +30,10 @@ const notifications = {
     title: ({ rejectedBy, group }: InviteRejectedParams) =>
       `${rejectedBy.name} has declined your invite to join ${group.name}`,
   },
+  scheduledTaskNotification: {
+    title: ({ task }: ScheduledTaskNotificationParams) =>
+      `Time to ${task.name}`,
+  },
 };
 
 interface InviteAcceptedParams {
@@ -44,4 +48,12 @@ interface InviteRejectedParams {
   group: Group;
 }
 
-type NotificationParams = InviteAcceptedParams | InviteRejectedParams;
+interface ScheduledTaskNotificationParams {
+  notification: 'scheduledTaskNotification';
+  task: Task;
+}
+
+type NotificationParams =
+  | InviteAcceptedParams
+  | InviteRejectedParams
+  | ScheduledTaskNotificationParams;

@@ -10,6 +10,7 @@ import { createContext } from './context';
 import { groupRouter } from './trpc-routers/group';
 import { inviteRouter } from './trpc-routers/invite';
 import { taskRouter } from './trpc-routers/task';
+import { startNotificationRunner } from './utils/scheduledTask/runner';
 
 export const trpcRouter = router({
   user: userRouter,
@@ -24,6 +25,7 @@ export const getApp = async () => {
   const app = express();
   environment.loadEnv();
   await cacheExistingSigningKeys();
+  startNotificationRunner();
 
   app.use(
     '/trpc',
