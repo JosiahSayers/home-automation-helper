@@ -9,11 +9,13 @@ import { userRouter } from './trpc-routers/user';
 import { createContext } from './context';
 import { groupRouter } from './trpc-routers/group';
 import { inviteRouter } from './trpc-routers/invite';
+import { taskRouter } from './trpc-routers/task';
 
 export const trpcRouter = router({
   user: userRouter,
   group: groupRouter,
   invite: inviteRouter,
+  task: taskRouter,
 });
 
 export type AppRouter = typeof trpcRouter;
@@ -33,6 +35,7 @@ export const getApp = async () => {
 
   app.use(express.json());
   app.use(cors());
+  app.disable('x-powered-by');
 
   app.use('/health', healthRouter);
 

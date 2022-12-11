@@ -12,11 +12,14 @@ export const inviteRouter = router({
   create: protectedProcedure
     .input(z.object({ groupId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const invite = await inviteUserToGroup(input.groupId, ctx.uid);
-      if (!invite) {
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      const result = await inviteUserToGroup(input.groupId, ctx.uid);
+      if (!result.success) {
+        throw new TRPCError({
+          code: result.statusCode,
+          message: result.errorMessage,
+        });
       }
-      return { invitedId: invite.id };
+      return { invitedId: result.invite.id };
     }),
 
   getById: publicProcedure

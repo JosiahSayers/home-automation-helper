@@ -1,41 +1,74 @@
 import { Group, GroupInvite, GroupInviteStatus, User } from '@prisma/client';
-import { TRPC_ERROR_CODE_KEY } from '@trpc/server/dist/rpc';
 import { db } from '../db';
 import { logger } from '../logger';
 import { sendNotification } from '../notifications';
+import {
+  BasicResponse,
+  FailedResponse,
+  SuccessfulResponse,
+} from '../routerUtils';
 import { getGroupWithAllMemberAndUser } from './queries';
 
 export const inviteUserToGroup = async (
   groupId: string,
   inviterId: string
-): Promise<GroupInvite | null> => {
-  const inviter = await db.user.findUnique({ where: { id: inviterId } });
-  const group = await db.group.findFirst({
-    where: {
-      id: groupId,
-      members: { some: { userId: inviterId, membershipType: 'owner' } },
-    },
-  });
-  if (!inviter || !group) {
-    logger.debug('Creating group invite failed, user or group not found', {
-      inviter,
-      group,
+): Promise<GroupInviteCreateResponse> => {
+  try {
+    const inviter = await db.user.findUnique({ where: { id: inviterId } });
+    const group = await db.group.findFirst({
+      where: {
+        id: groupId,
+        members: { some: { userId: inviterId, membershipType: 'owner' } },
+      },
     });
-    return null;
+
+    if (!inviter || !group) {
+      logger.debug('Creating group invite failed, user or group not found', {
+        inviter,
+        group,
+      });
+      return {
+        success: false,
+        errorMessage: 'group not found',
+        statusCode: 'NOT_FOUND',
+      };
+    }
+
+    if (group.isPersonal) {
+      logger.debug('User tried to create an invite for their personal group', {
+        user: inviter,
+        group,
+      });
+      return {
+        success: false,
+        errorMessage: 'Cannot invite users to a personal group',
+        statusCode: 'FORBIDDEN',
+      };
+    }
+
+    const invite = await db.groupInvite.create({
+      data: {
+        invitedById: inviter.id,
+        groupId,
+      },
+    });
+
+    return { success: true, invite };
+  } catch (e) {
+    logger.error(e, { msg: 'error creating group invite' });
+    return {
+      success: false,
+      errorMessage: 'Unknown error',
+      statusCode: 'INTERNAL_SERVER_ERROR',
+    };
   }
-  return db.groupInvite.create({
-    data: {
-      invitedById: inviter.id,
-      groupId,
-    },
-  });
 };
 
 export const respondToGroupInvite = async (
   inviteId: string,
   respondingUserId: string,
   action: GroupInviteStatus
-): Promise<GroupInviteResponse> => {
+): Promise<GroupInviteRespondResponse> => {
   const invite = await db.groupInvite.findUnique({ where: { id: inviteId } });
   if (!invite) {
     return {
@@ -88,7 +121,7 @@ const rejectGroupInvite = async (
   invite: GroupInvite,
   group: Group,
   rejectingUser: User
-): Promise<GroupInviteResponse> => {
+): Promise<GroupInviteRespondResponse> => {
   try {
     await db.groupInvite.update({
       where: { id: invite.id },
@@ -124,7 +157,7 @@ const acceptGroupInvite = async (
   invite: GroupInvite,
   group: GroupWithMembers,
   acceptingUser: User
-): Promise<GroupInviteResponse> => {
+): Promise<GroupInviteRespondResponse> => {
   try {
     await db.$transaction([
       db.groupMembers.create({
@@ -168,19 +201,11 @@ const acceptGroupInvite = async (
   }
 };
 
-interface SuccessfulGroupRespond {
-  success: true;
-  errorMessage?: undefined;
-  statusCode?: TRPC_ERROR_CODE_KEY;
-}
+type GroupInviteRespondResponse = BasicResponse;
 
-interface FailedGroupRespond {
-  success: false;
-  errorMessage: string;
-  statusCode: TRPC_ERROR_CODE_KEY;
-}
-
-type GroupInviteResponse = SuccessfulGroupRespond | FailedGroupRespond;
+type GroupInviteCreateResponse =
+  | (SuccessfulResponse & { invite: GroupInvite })
+  | FailedResponse;
 
 type GroupWithMembers = Awaited<
   ReturnType<typeof getGroupWithAllMemberAndUser>

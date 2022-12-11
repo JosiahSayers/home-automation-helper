@@ -56,6 +56,26 @@ export const getGroupWithMembers = async (groupId: string, userId: string) =>
           },
         },
       },
+      tasks: {
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          createdAt: true,
+          updatedAt: true,
+          notificationSettings: {
+            select: {
+              createdAt: true,
+              updatedAt: true,
+              schedule: true,
+              dayOfMonth: true,
+              dayOfWeek: true,
+              hour: true,
+              minute: true,
+            },
+          },
+        },
+      },
     },
   });
 

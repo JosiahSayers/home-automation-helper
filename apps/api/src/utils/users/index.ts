@@ -14,6 +14,22 @@ export const createUser = async (data: CreateUserInput) => {
       },
     });
 
+    await db.group.create({
+      data: {
+        name: 'Personal Group',
+        description:
+          "Use this group to create tasks that you don't need to share with anyone else",
+        isPersonal: true,
+        members: {
+          create: {
+            userId: user.id,
+            membershipType: 'owner',
+          },
+        },
+      },
+    });
+
+    // send welcome email
     return user;
   } catch (e) {
     logger.error(e, { msg: 'error creating user' });

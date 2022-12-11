@@ -1,8 +1,9 @@
 import { db } from '../db';
 
 export const truncateDb = async () => {
+  await db.taskCompletionRecord.deleteMany();
+  await db.taskNotificationSettings.deleteMany();
   await db.task.deleteMany();
-  await db.taskType.deleteMany();
   await db.groupInvite.deleteMany();
   await db.groupMembers.deleteMany();
   await db.group.deleteMany();

@@ -40,7 +40,7 @@ describe('inviteUserToGroup', () => {
   test('creates and returns an invite', async () => {
     const response = await inviteUserToGroup(testGroup.id, testUser.id);
     const inviteFromDb = await db.groupInvite.findUnique({
-      where: { id: response?.id },
+      where: { id: (response as any).invite.id },
     });
     expect(response).not.toBeNull();
     expect(inviteFromDb).not.toBeNull();

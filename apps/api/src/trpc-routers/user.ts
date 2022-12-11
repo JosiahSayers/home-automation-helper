@@ -2,9 +2,9 @@ import * as t from '@trpc/server';
 import { protectedProcedure, publicProcedure, router } from '../trpc';
 import { db } from '../utils/db';
 import { authenticateUserValidator, createUserValidator } from 'validations';
-import { doPasswordsMatch, encrypt } from '../utils/users/password';
+import { doPasswordsMatch } from '../utils/users/password';
 import { createSessionToken } from '../utils/authentication/session';
-import { clientSafeUser } from '../utils/users';
+import { clientSafeUser, createUser } from '../utils/users';
 import { logger } from '../utils/logger';
 
 export const userRouter = router({
@@ -14,6 +14,7 @@ export const userRouter = router({
     });
     return clientSafeUser(user);
   }),
+
   authenticate: publicProcedure
     .input(authenticateUserValidator)
     .mutation(async ({ input }) => {
@@ -34,18 +35,12 @@ export const userRouter = router({
       const token = await createSessionToken(user.id);
       return { token };
     }),
+
   register: publicProcedure
     .input(createUserValidator)
     .mutation(async ({ input }) => {
       try {
-        const user = await db.user.create({
-          data: {
-            email: input.email,
-            name: input.name,
-            password: await encrypt(input.password),
-          },
-        });
-
+        const user = await createUser(input);
         return clientSafeUser(user);
       } catch (e) {
         logger.error(e, { msg: 'error creating user' });
