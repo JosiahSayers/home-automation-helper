@@ -9,6 +9,11 @@ const getNotificationsForCurrentMinute = async () => {
         members: true,
       },
     },
+    notificationSettings: {
+      select: {
+        title: true,
+      },
+    },
   };
   const now = new Date();
   const time = { hour: now.getUTCHours(), minute: now.getUTCMinutes() };
@@ -51,6 +56,10 @@ const getNotificationsForCurrentMinute = async () => {
     ...monthlyNotifications,
   ];
 };
+
+export type ScheduledNotificationData = Awaited<
+  ReturnType<typeof getNotificationsForCurrentMinute>
+>[number];
 
 const processNotifications = async () => {
   const runnerRecord = await db.notificationRunnerRecord.create({ data: {} });

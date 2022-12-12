@@ -43,13 +43,19 @@ export const setNotificationSettings = async (
       };
     }
 
+    const notificationData = {
+      ...input,
+      title: input.notificationTitle ?? `Time for ${task.name}`,
+      notificationTitle: undefined,
+    };
+
     await db.taskNotificationSettings.upsert({
       where: { taskId: task.id },
       create: {
-        ...input,
+        ...notificationData,
         taskId: task.id,
       },
-      update: input,
+      update: notificationData,
     });
     return { success: true };
   } catch (e) {

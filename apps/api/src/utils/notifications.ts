@@ -1,5 +1,6 @@
-import { Group, Task, User } from '@prisma/client';
+import { Group, User } from '@prisma/client';
 import { logger } from './logger';
+import { ScheduledNotificationData } from './scheduledTask/runner';
 
 /** TODO
  * Actually send a notification
@@ -32,7 +33,7 @@ const notifications = {
   },
   scheduledTaskNotification: {
     title: ({ task }: ScheduledTaskNotificationParams) =>
-      `Time to ${task.name}`,
+      task.notificationSettings?.title,
   },
 };
 
@@ -50,7 +51,7 @@ interface InviteRejectedParams {
 
 interface ScheduledTaskNotificationParams {
   notification: 'scheduledTaskNotification';
-  task: Task;
+  task: ScheduledNotificationData;
 }
 
 type NotificationParams =

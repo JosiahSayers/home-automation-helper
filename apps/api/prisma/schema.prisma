@@ -108,6 +108,7 @@ model TaskNotificationSettings {
   dayOfMonth Int?
   hour       Int
   minute     Int
+  title      String
 
   task   Task   @relation(fields: [taskId], references: [id])
   taskId String @unique()

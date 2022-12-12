@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
 const baseFields = {
+  taskId: z.string(),
   hour: z.number().min(0).max(24),
   minute: z.number().min(0).max(59),
-  taskId: z.string(),
+  notificationTitle: z.string().optional(),
 };
 
 export const notificationSettingsValidator = z.discriminatedUnion('schedule', [
