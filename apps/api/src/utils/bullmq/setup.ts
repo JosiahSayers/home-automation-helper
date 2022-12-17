@@ -1,14 +1,10 @@
 import { Queue, Worker, Job } from 'bullmq';
+import { environment } from '../environment';
 import { sendNotification } from '../notifications';
 import { processNotifications } from '../scheduledTask/runner';
 
-const connection = {
-  host: '127.0.0.1',
-  port: 6379,
-};
-
 export const notificationQueue = new Queue('notifications', {
-  connection,
+  connection: environment.redisOptions(),
   defaultJobOptions: {
     attempts: 5,
     backoff: {
@@ -21,15 +17,15 @@ export const notificationQueue = new Queue('notifications', {
 export const notificationCheckQueue = new Queue<{
   timeToCheck?: string;
 }>('notification-check', {
-  connection,
+  connection: environment.redisOptions(),
 });
 
 new Worker(
   'notifications',
   async (job: Job<Parameters<typeof sendNotification>>) => {
-    sendNotification(...job.data);
+    return sendNotification(...job.data);
   },
-  { concurrency: 50, connection }
+  { concurrency: 50, connection: environment.redisOptions() }
 );
 
 new Worker(
@@ -40,5 +36,5 @@ new Worker(
       : new Date();
     return processNotifications(dateToCheck);
   },
-  { connection }
+  { connection: environment.redisOptions() }
 );

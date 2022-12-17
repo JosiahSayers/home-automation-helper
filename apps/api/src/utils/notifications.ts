@@ -8,7 +8,7 @@ import { ScheduledNotificationData } from './scheduledTask/runner';
  * Log record of notifications to database
  */
 
-export const sendNotification = (
+export const sendNotification = async (
   sendToUserId: string,
   params: NotificationParams
 ) => {

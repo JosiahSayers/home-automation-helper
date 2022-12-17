@@ -13,7 +13,10 @@
         "NODE_ENV",
         "PORT",
         "TEST_HOST",
-        "API_KEYS"
+        "API_KEYS",
+        "REDIS_HOST",
+        "REDIS_PORT",
+        "REDIS_PASSWORD"
       ]
     },
     "lint": {
