@@ -2,7 +2,7 @@ import { db } from '../db';
 import { logger } from '../logger';
 import { sendNotification } from '../notifications';
 
-const getNotificationsForCurrentMinute = async () => {
+const getNotificationsForMinute = async (minute: Date) => {
   const sharedInclude = {
     group: {
       select: {
@@ -15,8 +15,10 @@ const getNotificationsForCurrentMinute = async () => {
       },
     },
   };
-  const now = new Date();
-  const time = { hour: now.getUTCHours(), minute: now.getUTCMinutes() };
+  const sharedTime = {
+    hour: minute.getUTCHours(),
+    minute: minute.getUTCMinutes(),
+  };
   const [dailyNotifications, weeklyNotifications, monthlyNotifications] =
     await db.$transaction([
       db.task.findMany({
@@ -24,7 +26,7 @@ const getNotificationsForCurrentMinute = async () => {
         where: {
           notificationSettings: {
             schedule: 'daily',
-            ...time,
+            ...sharedTime,
           },
         },
       }),
@@ -33,8 +35,8 @@ const getNotificationsForCurrentMinute = async () => {
         where: {
           notificationSettings: {
             schedule: 'weekly',
-            dayOfWeek: now.getUTCDay(),
-            ...time,
+            dayOfWeek: minute.getUTCDay(),
+            ...sharedTime,
           },
         },
       }),
@@ -43,8 +45,8 @@ const getNotificationsForCurrentMinute = async () => {
         where: {
           notificationSettings: {
             schedule: 'monthly',
-            dayOfMonth: now.getUTCDate(),
-            ...time,
+            dayOfMonth: minute.getUTCDate(),
+            ...sharedTime,
           },
         },
       }),
@@ -58,12 +60,14 @@ const getNotificationsForCurrentMinute = async () => {
 };
 
 export type ScheduledNotificationData = Awaited<
-  ReturnType<typeof getNotificationsForCurrentMinute>
+  ReturnType<typeof getNotificationsForMinute>
 >[number];
 
-const processNotifications = async () => {
-  const runnerRecord = await db.notificationRunnerRecord.create({ data: {} });
-  const tasksToNotify = await getNotificationsForCurrentMinute();
+const processNotifications = async (notificationTime = new Date()) => {
+  const runnerRecord = await db.notificationRunnerRecord.create({
+    data: { createdAt: notificationTime },
+  });
+  const tasksToNotify = await getNotificationsForMinute(notificationTime);
   logger.info('Tasks to notify', { tasks: tasksToNotify.map((t) => t.id) });
   tasksToNotify.forEach((task) => {
     task.group?.members.forEach((member) => {
@@ -75,12 +79,37 @@ const processNotifications = async () => {
   });
   await db.notificationRunnerRecord.update({
     where: { id: runnerRecord.id },
-    data: { completedAt: new Date() },
+    data: {
+      completedAt: new Date(),
+      numberOfTasksQueued: tasksToNotify.length,
+    },
   });
 };
 
-export const startNotificationRunner = () => {
-  processNotifications();
+// Run at application startup to make sure any downtime does not cause missed notifications
+const processMissedNotifications = async () => {
+  logger.info('Checking for missed notifications');
+  const lastNotificationRun = await db.notificationRunnerRecord.findFirst({
+    where: { completedAt: { not: null } },
+    orderBy: { createdAt: 'desc' },
+  });
+  if (!lastNotificationRun) {
+    logger.info('No notification run records found');
+    return;
+  }
+  const timeToCheck = lastNotificationRun.createdAt;
+  timeToCheck.setUTCMinutes(timeToCheck.getUTCMinutes() + 1);
+  const timesChecked = [];
+  while (timeToCheck.getTime() < new Date().getTime()) {
+    timesChecked.push(timeToCheck.toISOString());
+    await processNotifications(timeToCheck);
+    timeToCheck.setUTCMinutes(timeToCheck.getUTCMinutes() + 1);
+  }
+  logger.info('Processed missed notifications', { timesChecked });
+};
+
+export const startNotificationRunner = async () => {
+  await processMissedNotifications();
   const oneMinute = 60_000;
   setInterval(() => processNotifications(), oneMinute);
 };

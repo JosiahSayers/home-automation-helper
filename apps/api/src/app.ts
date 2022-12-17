@@ -25,7 +25,7 @@ export const getApp = async () => {
   const app = express();
   environment.loadEnv();
   await cacheExistingSigningKeys();
-  startNotificationRunner();
+  await startNotificationRunner();
 
   app.use(
     '/trpc',
@@ -35,7 +35,6 @@ export const getApp = async () => {
     })
   );
 
-  app.use(express.json());
   app.use(cors());
   app.disable('x-powered-by');
 
