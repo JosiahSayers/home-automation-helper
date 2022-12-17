@@ -1,6 +1,6 @@
+import { notificationCheckQueue, notificationQueue } from '../bullmq/setup';
 import { db } from '../db';
 import { logger } from '../logger';
-import { sendNotification } from '../notifications';
 
 const getNotificationsForMinute = async (minute: Date) => {
   const sharedInclude = {
@@ -63,7 +63,7 @@ export type ScheduledNotificationData = Awaited<
   ReturnType<typeof getNotificationsForMinute>
 >[number];
 
-const processNotifications = async (notificationTime = new Date()) => {
+export const processNotifications = async (notificationTime = new Date()) => {
   const runnerRecord = await db.notificationRunnerRecord.create({
     data: { createdAt: notificationTime },
   });
@@ -71,10 +71,13 @@ const processNotifications = async (notificationTime = new Date()) => {
   logger.info('Tasks to notify', { tasks: tasksToNotify.map((t) => t.id) });
   tasksToNotify.forEach((task) => {
     task.group?.members.forEach((member) => {
-      sendNotification(member.userId, {
-        notification: 'scheduledTaskNotification',
-        task,
-      });
+      notificationQueue.add('scheduledTaskNotification', [
+        member.userId,
+        {
+          notification: 'scheduledTaskNotification',
+          task,
+        },
+      ]);
     });
   });
   await db.notificationRunnerRecord.update({
@@ -102,7 +105,9 @@ const processMissedNotifications = async () => {
   const timesChecked = [];
   while (timeToCheck.getTime() < new Date().getTime()) {
     timesChecked.push(timeToCheck.toISOString());
-    await processNotifications(timeToCheck);
+    await notificationCheckQueue.add('process-missed-notifications', {
+      timeToCheck: timeToCheck.toUTCString(),
+    });
     timeToCheck.setUTCMinutes(timeToCheck.getUTCMinutes() + 1);
   }
   logger.info('Processed missed notifications', { timesChecked });
@@ -111,5 +116,14 @@ const processMissedNotifications = async () => {
 export const startNotificationRunner = async () => {
   await processMissedNotifications();
   const oneMinute = 60_000;
-  setInterval(() => processNotifications(), oneMinute);
+  notificationCheckQueue.add(
+    'check-every-minute',
+    { timeToCheck: undefined },
+    {
+      repeat: {
+        every: oneMinute,
+        immediately: true,
+      },
+    }
+  );
 };

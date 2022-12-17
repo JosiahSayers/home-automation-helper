@@ -11,6 +11,7 @@ import { groupRouter } from './trpc-routers/group';
 import { inviteRouter } from './trpc-routers/invite';
 import { taskRouter } from './trpc-routers/task';
 import { startNotificationRunner } from './utils/scheduledTask/runner';
+import { serverAdapter } from './utils/bullmq/ui';
 
 export const trpcRouter = router({
   user: userRouter,
@@ -39,6 +40,7 @@ export const getApp = async () => {
   app.disable('x-powered-by');
 
   app.use('/health', healthRouter);
+  app.use('/admin/queues', serverAdapter.getRouter());
 
   return app;
 };

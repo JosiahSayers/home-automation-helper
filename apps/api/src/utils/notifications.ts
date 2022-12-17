@@ -14,6 +14,7 @@ export const sendNotification = (
 ) => {
   const notificationData = {
     notificationName: params.notification,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     title: notifications[params.notification].title(params as any),
   };
   logger.debug(
