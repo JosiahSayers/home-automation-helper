@@ -29,12 +29,20 @@ describe('inviteUserToGroup', () => {
 
   test('does not create an invite when the invitedId is not valid', async () => {
     const response = await inviteUserToGroup(testGroup.id, 'invalid user id');
-    expect(response).toBeNull();
+    expect(response).toEqual({
+      success: false,
+      errorMessage: 'group not found',
+      statusCode: 'NOT_FOUND',
+    });
   });
 
   test('does not create an invite when the groupId is not valid', async () => {
     const response = await inviteUserToGroup('invalid group id', testUser.id);
-    expect(response).toBeNull();
+    expect(response).toEqual({
+      success: false,
+      errorMessage: 'group not found',
+      statusCode: 'NOT_FOUND',
+    });
   });
 
   test('creates and returns an invite', async () => {
@@ -42,8 +50,10 @@ describe('inviteUserToGroup', () => {
     const inviteFromDb = await db.groupInvite.findUnique({
       where: { id: (response as any).invite.id },
     });
-    expect(response).not.toBeNull();
     expect(inviteFromDb).not.toBeNull();
-    expect(response).toEqual(inviteFromDb);
+    expect(response).toEqual({
+      success: true,
+      invite: inviteFromDb,
+    });
   });
 });
