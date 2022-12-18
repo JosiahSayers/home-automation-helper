@@ -7,33 +7,48 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      DOCKER_CMD: docker-compose -f ./apps/api/docker-compose.ci.yml
-      DOCKER_EXEC: docker-compose -f ./apps/api/docker-compose.ci.yml run app
+      DOCKER_CMD: docker-compose -f ./apps/api/docker-compose.yml
+      DOCKER_EXEC: docker-compose -f ./apps/api/docker-compose.yml run app
+      NODE_ENV: testing
+      CI: true
+      PORT: 3000
+      DATABASE_URL: postgres://developer@db:5432/home-automation-helper
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TEST_HOST: app
     
     steps:
     - name: Setup - Checkout code
       uses: actions/checkout@v1
 
-    - name: Start app and db containers
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci -ws
+
+    - name: Start db containers
       run: "${DOCKER_CMD} up -d"
 
     - name: Typecheck
-      run: "${DOCKER_EXEC} npm run typecheck"
+      run: "cd apps/api && npm run typecheck"
 
     - name: Lint
-      run: "${DOCKER_EXEC} npm run lint"
+      run: "cd apps/api && npm run lint"
 
     - name: Setup Test DB
-      run: "${DOCKER_EXEC} npx prisma migrate deploy"
+      run: "cd apps/api && npx prisma migrate deploy"
 
     - name: Seed Test DB
-      run: "${DOCKER_EXEC} npm run db:seed"
+      run: "cd apps/api && npm run db:seed"
 
     - name: Unit Tests
-      run: "${DOCKER_EXEC} npm run test:unit"
+      run: "cd apps/api && npm run test:unit"
 
     - name: API Tests
-      run: "${DOCKER_EXEC} npm run test:api"
+      run: "cd apps/api && npm run test:api"
 
     - name: Stop containers
       if: always()
