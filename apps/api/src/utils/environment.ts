@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { ConnectionOptions } from 'node-resque';
+import { ConnectionOptions } from 'bullmq';
 import { logger } from './logger';
 
 export const environment = {
@@ -26,9 +26,7 @@ export const environment = {
   redisOptions: (): ConnectionOptions => ({
     host: process.env.REDIS_HOST,
     port: parseInt(process.env.REDIS_PORT!),
-    options: {
-      password: process.env.REDIS_PASSWORD,
-    },
+    password: process.env.REDIS_PASSWORD,
   }),
   testHost: () => process.env.TEST_HOST || 'http://localhost',
   isProduction: () => process.env.NODE_ENV === 'production',
