@@ -4,6 +4,7 @@ on:
     branches: [ main ]
 jobs:
   api-ci:
+    name: API CI Checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -27,7 +28,7 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm ci -ws
+      run: npm i -ws
 
     - name: Build Packages
       run: npm run build
