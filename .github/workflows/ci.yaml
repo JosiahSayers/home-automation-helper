@@ -3,12 +3,12 @@ on:
   pull_request:
     branches: [ main ]
 jobs:
-  CI:
+  api-ci:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      DOCKER_CMD: docker-compose -f docker-compose.ci.yml
-      DOCKER_EXEC: docker-compose -f docker-compose.ci.yml run app
+      DOCKER_CMD: docker-compose -f ./apps/api/docker-compose.ci.yml
+      DOCKER_EXEC: docker-compose -f ./apps/api/docker-compose.ci.yml run app
     
     steps:
     - name: Setup - Checkout code
