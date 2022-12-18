@@ -13,9 +13,9 @@ jobs:
       CI: true
       PORT: 3000
       DATABASE_URL: postgres://developer@db:5432/home-automation-helper
-      REDIS_HOST: redis
+      REDIS_HOST: 127.0.0.1
       REDIS_PORT: 6379
-      TEST_HOST: app
+      TEST_HOST: 127.0.0.1
     
     steps:
     - name: Setup - Checkout code
@@ -28,6 +28,9 @@ jobs:
 
     - name: Install dependencies
       run: npm ci -ws
+
+    - name: Build Packages
+      run: npm run build
 
     - name: Start db containers
       run: "${DOCKER_CMD} up -d"
