@@ -1,0 +1,36 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**"
+      ],
+      "env": [
+        "NODE_ENV",
+        "PORT",
+        "TEST_HOST",
+        "API_KEYS",
+        "REDIS_HOST",
+        "REDIS_PORT",
+        "REDIS_PASSWORD"
+      ]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "dev": {
+      "dependsOn": [
+        "^build"
+      ],
+      "cache": false
+    },
+    "test:unit": {
+      "outputs": [],
+      "cache": false
+    }
+  }
+}

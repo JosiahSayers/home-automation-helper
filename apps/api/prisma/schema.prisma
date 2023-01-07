@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SigningKey {
+  id         String   @id() @default(uuid())
+  publicKey  String
+  privateKey String
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime @default(dbgenerated("NOW() + '24 hours'"))
+}
+
+model User {
+  id        String   @id() @default(uuid())
+  name      String
+  email     String   @unique()
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+
+  groupMembers    GroupMembers[]
+  acceptedInvites GroupInvite[]          @relation("accepted-group-invites")
+  groupInvites    GroupInvite[]
+  tasksCompleted  TaskCompletionRecord[]
+}
+
+model Group {
+  id          String   @id() @default(uuid())
+  name        String
+  description String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt()
+  isPersonal  Boolean  @default(false)
+
+  members GroupMembers[]
+  tasks   Task[]
+  invites GroupInvite[]
+}
+
+model GroupMembers {
+  membershipType GroupMembershipType
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt()
+
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+  group   Group  @relation(fields: [groupId], references: [id])
+  groupId String
+
+  @@id([userId, groupId])
+}
+
+enum GroupMembershipType {
+  owner
+  member
+}
+
+model GroupInvite {
+  id        String            @id @default(uuid())
+  status    GroupInviteStatus @default(pending)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt()
+
+  group            Group   @relation(fields: [groupId], references: [id])
+  groupId          String
+  invitedBy        User    @relation(fields: [invitedById], references: [id])
+  invitedById      String
+  respondingUser   User?   @relation("accepted-group-invites", fields: [respondingUserId], references: [id])
+  respondingUserId String?
+}
+
+enum GroupInviteStatus {
+  pending
+  accepted
+  rejected
+}
+
+model Task {
+  id          String   @id() @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt()
+
+  group                Group?                    @relation(fields: [groupId], references: [id])
+  groupId              String?
+  taskCompletions      TaskCompletionRecord[]
+  notificationSettings TaskNotificationSettings?
+}
+
+enum TaskNotificationScheduleOptions {
+  daily
+  weekly
+  monthly
+}
+
+model TaskNotificationSettings {
+  id         String                          @id() @default(uuid())
+  createdAt  DateTime                        @default(now())
+  updatedAt  DateTime                        @updatedAt()
+  schedule   TaskNotificationScheduleOptions
+  dayOfWeek  Int?
+  dayOfMonth Int?
+  hour       Int
+  minute     Int
+  title      String
+
+  task   Task   @relation(fields: [taskId], references: [id])
+  taskId String @unique()
+}
+
+model TaskCompletionRecord {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  completedBy       User   @relation(fields: [completedByUserId], references: [id])
+  completedByUserId String
+  task              Task   @relation(fields: [taskTypeId], references: [id])
+  taskTypeId        String
+}
+
+model NotificationRunnerRecord {
+  id                  String    @id @default(uuid())
+  createdAt           DateTime  @default(now())
+  completedAt         DateTime?
+  numberOfTasksQueued Int?
+}
